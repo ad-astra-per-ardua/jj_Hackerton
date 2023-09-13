@@ -12,6 +12,7 @@ urlpatterns = [
     path('api/search_link/', views.search_link, name='search_link'),
     path('', views.secret, name='map_test'),
     path('api/geocode/', views.geocode_address, name='geocode_address'),
-
+    path('add_restaurant/', views.add_restaurant, name='add_restaurant'),
+path('api/get_all_restaurants/', views.get_all_restaurants, name='get_all_restaurants'),
 
 ]
