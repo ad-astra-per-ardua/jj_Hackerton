@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
+from django.conf import settings
 from .models import Restaurant
 import requests
 import json
@@ -84,24 +85,52 @@ def get_all_restaurants(request):
     ]
     return JsonResponse({'restaurants': data})
 
+
 def geocode_address(request):
     address = request.GET.get('address')
-    api_key = get_secret("api_key")
-    url = f"https://dapi.kakao.com/v2/local/search/address.json?query={address}"
 
+    # Use Naver's Geocoding API
+    url = 'https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode'
     headers = {
-        "Authorization": f"KakaoAK {api_key}"
+        'X-NCP-APIGW-API-KEY-ID': settings.NAVER_API_KEY_ID,
+        'X-NCP-APIGW-API-KEY': settings.NAVER_API_KEY_SECRET
     }
-    response = requests.get(url, headers=headers)
+    params = {'query': address}
+
+    response = requests.get(url, headers=headers, params=params)
     data = response.json()
 
-    if data['documents']:
-        latitude = data['documents'][0]['y']
-        longitude = data['documents'][0]['x']
-        return JsonResponse({'latitude': latitude, 'longitude': longitude})
+    if data['addresses']:
+        latitude = data['addresses'][0]['y']
+        longitude = data['addresses'][0]['x']
+        return JsonResponse({"latitude": latitude, "longitude": longitude})
     else:
-        return JsonResponse({'error': 'Unable to geocode address'}, status=400)
+        return JsonResponse({"error": "Cannot find address"}, status=400)
 
 def secret(request):
     js_key = get_secret("js_key")
     return render(request, 'map_test.html', {'js_key': js_key})
+
+
+def get_naver_directions(request):
+    # 사용자의 위치와 목적지 위치를 요청에서 가져옵니다.
+    start_lat = request.GET.get('start_lat')
+    start_lng = request.GET.get('start_lng')
+    end_lat = request.GET.get('end_lat')
+    end_lng = request.GET.get('end_lng')
+
+    # 네이버 지도 API endpoint
+    url = f"https://naveropenapi.apigw.ntruss.com/map-direction/v1/driving?start={start_lng},{start_lat}&goal={end_lng},{end_lat}&option=trafast"
+
+    headers = {
+        "X-NCP-APIGW-API-KEY-ID": get_secret("NAVER_CLIENT_ID"),
+        "X-NCP-APIGW-API-KEY": get_secret("NAVER_CLIENT_SECRET")
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()
+        return JsonResponse(data)
+    else:
+        return JsonResponse({"error": "Unable to fetch directions"}, status=400)

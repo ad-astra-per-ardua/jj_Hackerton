@@ -7,20 +7,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kakao Map Test</title>
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey={{ js_key }}"></script>
-
 </head>
 <body>
     <h1>Kakao Map Test Page</h1>
 
-    <h3>Kakao Geocoding testing</h3>
-    <button onclick="showAllRestaurants()">모든 음식점 보기</button><button onclick="showUserLocation()">내 위치 보기</button>
+    <h3>지도 기능</h3>
+    <button onclick="showAllRestaurants()">모든 음식점 보기</button>
+    <button onclick="showUserLocation()">내 위치 보기</button>
 
     <div id="map" style="width:500px;height:400px;"></div>
 
     <h3>지오코딩 결과</h3>
     <p id="geocodeResult">위도: <span id="latitudeResult"></span>, 경도: <span id="longitudeResult"></span></p>
-    <h3>레스토랑 추가하기</h3>
 
+    <h3>레스토랑 추가하기</h3>
     <form action="{% url 'add_restaurant' %}" method="post">
         {% csrf_token %}
         <label for="name">레스토랑 이름:</label>
@@ -37,6 +37,7 @@
         <br>
         <input type="submit" value="레스토랑 추가">
     </form>
-<script src="{% static 'map_script.js' %}"></script>
+
+    <script src="{% static 'map_script.js' %}"></script>
 </body>
 </html>

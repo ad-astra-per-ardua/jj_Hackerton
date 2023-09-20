@@ -1,4 +1,4 @@
-
+var userMarkerPosition;
 var mapContainer = document.getElementById('map');
 var mapOption = {
     center: new kakao.maps.LatLng(37.50802, 127.062835),
@@ -22,7 +22,8 @@ function createMarkerWithInfo(restaurant, map) {
                 이름: ${restaurant.name} <br>
                 메뉴: ${restaurant.menu} <br>
                 가격: ${restaurant.price} <br>
-                주소: ${restaurant.address}
+                주소: ${restaurant.address} <br>
+                <button onclick="getDirectionsToRestaurant({name: '${restaurant.name}', latitude: ${restaurant.latitude}, longitude: ${restaurant.longitude}})">길찾기</button>
             </div>
         `;
         infowindow.setContent(content);
@@ -72,13 +73,13 @@ function showUserLocation() {
     function success(position) {
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
-        const userPosition = new kakao.maps.LatLng(latitude, longitude);
+        userMarkerPosition = new kakao.maps.LatLng(latitude, longitude);
 
         if (userMarker) {
-            userMarker.setPosition(userPosition);
+            userMarker.setPosition(userMarkerPosition);
         } else {
             userMarker = new kakao.maps.Marker({
-                position: userPosition,
+                position: userMarkerPosition,
                 image: new kakao.maps.MarkerImage(
                     'https://icons.iconarchive.com/icons/emey87/trainee/16/Gps-icon.png',
                     new kakao.maps.Size(24, 24),
@@ -87,8 +88,11 @@ function showUserLocation() {
                 draggable: true
             });
             userMarker.setMap(map);
+            kakao.maps.event.addListener(userMarker, 'dragend', function() {
+                userMarkerPosition = userMarker.getPosition();
+            });
         }
-        map.setCenter(userPosition);
+        map.setCenter(userMarkerPosition);
     }
 
     function error() {
@@ -96,3 +100,21 @@ function showUserLocation() {
     }
     navigator.geolocation.getCurrentPosition(success, error);
 }
+
+function getDirectionsToRestaurant(restaurant) {
+    if (userMarkerPosition) {
+        const startLat = userMarkerPosition.getLat();
+        const startLng = userMarkerPosition.getLng();
+        const endLat = restaurant.latitude;
+        const endLng = restaurant.longitude;
+        const startName = encodeURIComponent("내 위치");
+        const endName = encodeURIComponent(restaurant.name);
+
+        // Use Naver's map URL for directions
+        const link = `https://map.naver.com/v5/directions/${startLat},${startLng},${startName}/${endLat},${endLng},${endName}`;
+        window.location.href = link;
+    } else {
+        alert("사용자 위치를 먼저 설정해주세요.");
+    }
+}
+
