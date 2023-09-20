@@ -1,5 +1,7 @@
 
 from django.contrib import admin
+from django.conf.urls.static import static
+from django.conf import settings
 from django.urls import path
 from restaurants import views
 from django.views.generic import *
@@ -13,6 +15,9 @@ urlpatterns = [
     path('', views.secret, name='map_test'),
     path('api/geocode/', views.geocode_address, name='geocode_address'),
     path('add_restaurant/', views.add_restaurant, name='add_restaurant'),
-path('api/get_all_restaurants/', views.get_all_restaurants, name='get_all_restaurants'),
+    path('api/get_all_restaurants/', views.get_all_restaurants, name='get_all_restaurants'),
 
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

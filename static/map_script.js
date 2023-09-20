@@ -8,30 +8,6 @@ var map = new kakao.maps.Map(mapContainer, mapOption);
 
 var infowindow = new kakao.maps.InfoWindow({zIndex:1});
 
-function getMapLink() {
-    fetch('/api/map_link/?latitude=37.402056&longitude=127.108212&name=우리회사')
-    .then(response => response.json())
-    .then(data => {
-        window.location.href = data.link;
-    });
-}
-
-function getRouteLink() {
-    fetch('/api/route_link/?latitude=37.402056&longitude=127.108212&name=카카오판교오피스')
-    .then(response => response.json())
-    .then(data => {
-        window.location.href = data.link;
-    });
-}
-
-function getRoadviewLink() {
-    fetch('/api/roadview_link/?latitude=37.402056&longitude=127.108212')
-    .then(response => response.json())
-    .then(data => {
-        window.location.href = data.link;
-    });
-}
-
 function createMarkerWithInfo(restaurant, map) {
     const position = new kakao.maps.LatLng(restaurant.latitude, restaurant.longitude);
     const marker = new kakao.maps.Marker({

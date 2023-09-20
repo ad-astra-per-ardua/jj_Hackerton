@@ -103,8 +103,5 @@ def geocode_address(request):
         return JsonResponse({'error': 'Unable to geocode address'}, status=400)
 
 def secret(request):
-    with open('secrets.json', 'r') as file:
-        secrets = json.load(file)
-    js_key = secrets["js_key"]
-
+    js_key = get_secret("js_key")
     return render(request, 'map_test.html', {'js_key': js_key})
