@@ -126,5 +126,17 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-NAVER_API_KEY_ID = 'g8lnz5fqgx'
-NAVER_API_KEY_SECRET = 'BilNnPj2NdBT7b84cjQX8azx4dg6jQCpOtzeGZyy'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    }
+}

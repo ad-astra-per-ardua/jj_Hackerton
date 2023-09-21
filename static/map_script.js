@@ -109,12 +109,15 @@ function getDirectionsToRestaurant(restaurant) {
         const endLat = restaurant.latitude;
         const endLng = restaurant.longitude;
 
-        fetch(`/api/naver_directions/?start_latitude=${startLat}&start_longitude=${startLng}&end_latitude=${endLat}&end_longitude=${endLng}&end_name=${restaurant.name}`)
+        fetch(`/create_naver_directions_link/?start_latitude=${startLat}&start_longitude=${startLng}&end_latitude=${endLat}&end_longitude=${endLng}`)
         .then(response => response.json())
         .then(data => {
-            console.log(data);  // 여기에 로그를 찍어서 어떤 데이터가 오고 있는지 확인
-            window.open(data.link, '_blank');
-
+            console.log("API Response: ", data);
+            if (data.result === 'success') {
+                window.open(data.link, '_blank');
+            } else {
+                alert('길찾기를 실패했습니다.');
+            }
         });
     } else {
         alert("사용자 위치를 먼저 설정해주세요.");
