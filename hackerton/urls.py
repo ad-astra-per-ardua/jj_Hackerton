@@ -16,6 +16,8 @@ urlpatterns = [
     path('api/geocode/', views.geocode_address, name='geocode_address'),
     path('add_restaurant/', views.add_restaurant, name='add_restaurant'),
     path('api/get_all_restaurants/', views.get_all_restaurants, name='get_all_restaurants'),
+    path('api/naver_directions/', views.get_naver_directions, name='naver_directions'),
+    path('route_link/', views.route_link, name='route_link'),
 
 ]
 
