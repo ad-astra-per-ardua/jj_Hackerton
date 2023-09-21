@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from django.conf import settings
 from .models import Restaurant
-import requests
+import requests,logging
 import json
 from hackerton.settings import get_secret
+from django.views.decorators.csrf import csrf_exempt
+
+logger = logging.getLogger(__name__)
 
 
 def map_link(request):
@@ -16,13 +18,37 @@ def map_link(request):
     return JsonResponse({'link': link})
 
 
+@csrf_exempt
 def route_link(request):
-    latitude = request.GET.get('latitude')
-    longitude = request.GET.get('longitude')
-    name = request.GET.get('name')
+    try:
+        start_x = request.GET.get('start_x', None)  # 출발지의 경도
+        start_y = request.GET.get('start_y', None)  # 출발지의 위도
+        end_x = request.GET.get('end_x', None)  # 목적지의 경도
+        end_y = request.GET.get('end_y', None)  # 목적지의 위도
 
-    link = f"https://map.kakao.com/link/to/{name},{latitude},{longitude}"
-    return JsonResponse({'link': link})
+        # 네이버 길찾기 API URL
+        url = "https://naveropenapi.apigw.ntruss.com/map-direction/v1/driving"
+
+        # API 호출을 위한 헤더 설정
+        headers = {
+            'X-NCP-APIGW-API-KEY-ID': get_secret("NAVER_API_KEY_ID"),
+            'X-NCP-APIGW-API-KEY': get_secret("NAVER_API_KEY_SECRET"),
+        }
+
+        # API 호출을 위한 파라미터 설정
+        params = {
+            'start': f"{start_x},{start_y}",
+            'goal': f"{end_x},{end_y}",
+        }
+
+        # API 호출
+        final_url = f"https://map.naver.com/p/directions/-/-/-/transit?c={end_y},{end_x},0,0,dh"
+        logger.debug(f"Final URL: {final_url}")
+
+        return JsonResponse({'result': 'success', 'route_url': final_url})
+
+    except Exception as e:
+        return JsonResponse({'result': 'error', 'message': str(e)})
 
 
 def roadview_link(request):
@@ -88,12 +114,13 @@ def get_all_restaurants(request):
 
 def geocode_address(request):
     address = request.GET.get('address')
-
+    naverapi = get_secret("NAVER_API_KEY_ID")
+    naverpass = get_secret("NAVER_API_KEY_SECRET")
     # Use Naver's Geocoding API
     url = 'https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode'
     headers = {
-        'X-NCP-APIGW-API-KEY-ID': settings.NAVER_API_KEY_ID,
-        'X-NCP-APIGW-API-KEY': settings.NAVER_API_KEY_SECRET
+        'X-NCP-APIGW-API-KEY-ID': naverapi.NAVER_API_KEY_ID,
+        'X-NCP-APIGW-API-KEY': naverpass.NAVER_API_KEY_SECRET
     }
     params = {'query': address}
 
@@ -113,24 +140,13 @@ def secret(request):
 
 
 def get_naver_directions(request):
-    # 사용자의 위치와 목적지 위치를 요청에서 가져옵니다.
-    start_lat = request.GET.get('start_lat')
-    start_lng = request.GET.get('start_lng')
-    end_lat = request.GET.get('end_lat')
-    end_lng = request.GET.get('end_lng')
+    start_latitude = request.GET.get('start_latitude')
+    start_longitude = request.GET.get('start_longitude')
+    end_latitude = request.GET.get('end_latitude')
+    end_longitude = request.GET.get('end_longitude')
+    start_name = request.GET.get('start_name', '내 위치')
+    end_name = request.GET.get('end_name')
 
-    # 네이버 지도 API endpoint
-    url = f"https://naveropenapi.apigw.ntruss.com/map-direction/v1/driving?start={start_lng},{start_lat}&goal={end_lng},{end_lat}&option=trafast"
+    link = f"https://map.naver.com/v5/directions/{start_latitude},{start_longitude},{start_name}/{end_latitude},{end_longitude},{end_name}/"
+    return JsonResponse({'link': link})
 
-    headers = {
-        "X-NCP-APIGW-API-KEY-ID": get_secret("NAVER_CLIENT_ID"),
-        "X-NCP-APIGW-API-KEY": get_secret("NAVER_CLIENT_SECRET")
-    }
-
-    response = requests.get(url, headers=headers)
-
-    if response.status_code == 200:
-        data = response.json()
-        return JsonResponse(data)
-    else:
-        return JsonResponse({"error": "Unable to fetch directions"}, status=400)

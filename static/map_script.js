@@ -16,19 +16,20 @@ function createMarkerWithInfo(restaurant, map) {
     });
 
     // 마커에 클릭 이벤트를 등록합니다.
+    console.log("Creating marker with info");
     kakao.maps.event.addListener(marker, 'click', function() {
-        const content = `
-            <div style="padding:5px;">
-                이름: ${restaurant.name} <br>
-                메뉴: ${restaurant.menu} <br>
-                가격: ${restaurant.price} <br>
-                주소: ${restaurant.address} <br>
-                <button onclick="getDirectionsToRestaurant({name: '${restaurant.name}', latitude: ${restaurant.latitude}, longitude: ${restaurant.longitude}})">길찾기</button>
-            </div>
-        `;
-        infowindow.setContent(content);
-        infowindow.open(map, marker);
-    });
+    const content = `
+        <div style="padding:5px;">
+            이름: ${restaurant.name} <br>
+            메뉴: ${restaurant.menu} <br>
+            가격: ${restaurant.price} <br>
+            주소: ${restaurant.address} <br>
+            <button onclick="getDirectionsToRestaurant({name: '${restaurant.name}', latitude: ${restaurant.latitude}, longitude: ${restaurant.longitude}})">네이버 길찾기</button>
+        </div>
+    `;
+    infowindow.setContent(content);
+    infowindow.open(map, marker);
+});
 
     marker.setMap(map);
 }
@@ -107,14 +108,62 @@ function getDirectionsToRestaurant(restaurant) {
         const startLng = userMarkerPosition.getLng();
         const endLat = restaurant.latitude;
         const endLng = restaurant.longitude;
-        const startName = encodeURIComponent("내 위치");
-        const endName = encodeURIComponent(restaurant.name);
 
-        // Use Naver's map URL for directions
-        const link = `https://map.naver.com/v5/directions/${startLat},${startLng},${startName}/${endLat},${endLng},${endName}`;
-        window.location.href = link;
+        fetch(`/api/naver_directions/?start_latitude=${startLat}&start_longitude=${startLng}&end_latitude=${endLat}&end_longitude=${endLng}&end_name=${restaurant.name}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);  // 여기에 로그를 찍어서 어떤 데이터가 오고 있는지 확인
+            window.open(data.link, '_blank');
+
+        });
     } else {
         alert("사용자 위치를 먼저 설정해주세요.");
     }
 }
 
+
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var pos = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+            // 현재 위치를 출발지로 설정
+            start_x = pos.lng;
+            start_y = pos.lat;
+            // 경로를 찾는 함수 호출
+            findRoute(start_x, start_y, end_x, end_y);
+        });
+    }
+}
+
+function findRoute(start_x, start_y, end_x, end_y) {
+    // Django의 route_link 함수를 호출
+    $.ajax({
+        url: "/route_link/",
+        type: "GET",
+        data: {
+            start_x: start_x,
+            start_y: start_y,
+            end_x: end_x,
+            end_y: end_y
+        },
+        success: function(data) {
+            if (data.result === "success") {
+                // 경로 정보를 활용하는 코드 (예: 지도에 경로 표시)
+            } else {
+                // 에러 처리
+            }
+        }
+    });
+}
+// 페이지 로드가 완료되면 실행
+$(document).ready(function() {
+    // 목적지는 미리 설정되어 있다고 가정 (예: 서울역)
+    end_x = 126.972559;
+    end_y = 37.555062;
+
+    // 현재 위치를 가져와서 경로를 찾는 함수 호출
+    getCurrentLocation();
+});
