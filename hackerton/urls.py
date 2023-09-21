@@ -18,6 +18,7 @@ urlpatterns = [
     path('api/get_all_restaurants/', views.get_all_restaurants, name='get_all_restaurants'),
     path('api/naver_directions/', views.get_naver_directions, name='naver_directions'),
     path('route_link/', views.route_link, name='route_link'),
+    path('create_naver_directions_link/',views.create_naver_directions_link,name='create_naver_directions_link'),
 
 ]
 
