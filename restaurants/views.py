@@ -33,8 +33,8 @@ def create_naver_directions_link(request):
         start = (start_latitude, start_longitude)
         goal = (end_latitude, end_longitude)
 
-        client_id = naverapi.NAVER_API_KEY_ID
-        client_secret = naverpass.NAVER_API_KEY_SECRET
+        client_id = naverapi
+        client_secret = naverpass
 
         url = f"https://naveropenapi.apigw.ntruss.com/map-direction-15/v1/driving?start={start[0]},{start[1]}&goal={goal[0]},{goal[1]}"
 
@@ -148,6 +148,8 @@ def geocode_address(address):
     naverpass = get_secret("NAVER_API_KEY_SECRET")
     # Use Naver's Geocoding API
     url = 'https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode'
+
+
     headers = {
         'X-NCP-APIGW-API-KEY-ID': naverapi,
         'X-NCP-APIGW-API-KEY': naverpass
