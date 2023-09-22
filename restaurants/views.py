@@ -134,7 +134,6 @@ def get_all_restaurants(request):
         {
             "name": restaurant.name,
             "menu": restaurant.menu,
-            "price": restaurant.price,
             "address": restaurant.address,
             "latitude": restaurant.latitude,
             "longitude": restaurant.longitude

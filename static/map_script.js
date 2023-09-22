@@ -22,7 +22,6 @@ function createMarkerWithInfo(restaurant, map) {
         <div style="padding:5px;">
             이름: ${restaurant.name} <br>
             메뉴: ${restaurant.menu} <br>
-            가격: ${restaurant.price} <br>
             주소: ${restaurant.address} <br>
             <button onclick="getDirectionsToRestaurant({name: '${restaurant.name}', latitude: ${restaurant.latitude}, longitude: ${restaurant.longitude}})">네이버 길찾기</button>
         </div>
