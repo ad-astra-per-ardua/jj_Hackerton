@@ -73,35 +73,6 @@ def route_link(request):
     except Exception as e:
         return JsonResponse({'result': 'error', 'message': str(e)})
 
-def add_restaurant(request):
-    if request.method == "POST":
-        name = request.POST.get('name')
-        menu = request.POST.get('menu')
-        address = request.POST.get('address')
-
-        # 위도와 경도 얻기
-        api_key = get_secret("api_key")
-        url = f"https://dapi.kakao.com/v2/local/search/address.json?query={address}"
-        headers = {"Authorization": f"KakaoAK {api_key}"}
-        response = requests.get(url, headers=headers)
-        data = response.json()
-
-        latitude = None
-        longitude = None
-        if data['documents']:
-            latitude = float(data['documents'][0]['y'])
-            longitude = float(data['documents'][0]['x'])
-
-        restaurant = Restaurant(
-            name=name, menu=menu, address=address,
-            latitude=latitude, longitude=longitude
-        )
-        restaurant.save()
-
-        return redirect('map_test')
-
-    return render(request, 'map_test.html')
-
 def get_all_restaurants(request):
     restaurants = Restaurant.objects.all()
     data = [
