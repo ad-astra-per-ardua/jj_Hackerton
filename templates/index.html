@@ -1,0 +1,143 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Index</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="{% static public.css %}" />
+     <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId={{ NAVER_API_KEY_ID }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Nav -->
+      <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">
+            <img src="/static/img/logo.png" alt="Bootstrap" height="60" />
+          </a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="#">홈</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">지도</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Search -->
+      <div class="row mb-4 mt-4">
+        <label for="exampleFormControlInput1" class="form-label mb-0"
+          ><h3 class="mb-1">출발지</h3></label
+        >
+        <div class="input-group">
+          <input
+            type="email"
+            class="form-control"
+            id="exampleFormControlInput1"
+          />
+          <button onclick="showUserLocation()" class="btn btn-outline-secondary" type="button">
+            내 위치
+          </button>
+          <button onclick="showAllRestaurants()" class="btn btn-outline-secondary" type="button">검색</button>
+        </div>
+      </div>
+
+      <!-- Option & Map -->
+      <div class="form-check form-check-inline mb-1">
+        <input
+          class="form-check-input"
+          type="radio"
+          name="inlineRadioOptions"
+          id="inlineRadio1"
+          value="option1"
+          checked
+        />
+        <label class="form-check-label" for="inlineRadio1">관광지</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input
+          class="form-check-input"
+          type="radio"
+          name="inlineRadioOptions"
+          id="inlineRadio2"
+          value="option2"
+        />
+        <label class="form-check-label" for="inlineRadio2">식당</label>
+      </div>
+
+      <div class="mb-4" id="map" style="width: 500px;height: 400px"></div>
+
+      <!-- List -->
+      <ul class="list-group list-group-flush">
+        <a href="#" class="list-group-item list-group-item-action mb-2">
+          <div class="ms-2 me-auto">
+            <div class="fw-bold">상점명</div>
+            대표메뉴
+          </div>
+          <div class="btn-group mt-2" role="group">
+            <button type="button" class="btn btn-primary">상세보기</button>
+            <button type="button" class="btn btn-outline-primary">
+              경로에 추가
+            </button>
+          </div>
+        </a>
+        <a href="#" class="list-group-item list-group-item-action mb-2">
+          <div class="ms-2 me-auto">
+            <div class="fw-bold">상점명</div>
+            대표메뉴
+          </div>
+          <div class="btn-group mt-2" role="group">
+            <button type="button" class="btn btn-primary">상세보기</button>
+            <button type="button" class="btn btn-outline-primary">
+              경로에 추가
+            </button>
+          </div>
+        </a>
+        <a href="#" class="list-group-item list-group-item-action mb-2">
+          <div class="ms-2 me-auto">
+            <div class="fw-bold">상점명</div>
+            대표메뉴
+          </div>
+          <div class="btn-group mt-2" role="group">
+            <button type="button" class="btn btn-primary">상세보기</button>
+            <button type="button" class="btn btn-outline-primary">
+              경로에 추가
+            </button>
+          </div>
+        </a>
+      </ul>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+      crossorigin="anonymous"
+    ></script>
+
+  <script src="{% static 'map_script.js' %}"></script>
+  </body>
+</html>

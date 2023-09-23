@@ -1,0 +1,9 @@
+@import url(//fonts.googleapis.com/earlyaccess/jejugothic.css);
+*{
+    font-family: 'Jeju Gothic', sans-serif;
+}
+
+.max-width-image {
+    max-width: 100%;
+    height: auto; /* 원래 이미지 비율을 유지합니다. */
+  }

@@ -1,37 +1,65 @@
 var userMarkerPosition;
+var markerClicked = false;
 var mapContainer = document.getElementById('map');
-var mapOption = {
-    center: new kakao.maps.LatLng(37.50802, 127.062835),
-    level: 3
-};
-var map = new kakao.maps.Map(mapContainer, mapOption);
+var mapDiv = document.getElementById('map');
+var mapOptions = {
+    center: new naver.maps.LatLng(33.499621,126.531188),
+    zoom:10
+}
+var map = new naver.maps.Map('map',mapOptions);
 
-var infowindow = new kakao.maps.InfoWindow({zIndex:1});
+
+var trafficLayer = new naver.maps.TrafficLayer({
+    interval : 300000
+})
+var btn = $('#traffic')
+
+
+var openedInfowindow = null;
 
 function createMarkerWithInfo(restaurant, map) {
-    const position = new kakao.maps.LatLng(restaurant.latitude, restaurant.longitude);
-    const marker = new kakao.maps.Marker({
+    const position = new naver.maps.LatLng(restaurant.latitude, restaurant.longitude);
+    const marker = new naver.maps.Marker({
         position: position,
-        title: restaurant.name
+        title: restaurant.name,
+        map: map
     });
 
-    // 마커에 클릭 이벤트를 등록합니다.
-    console.log("Creating marker with info");
-    kakao.maps.event.addListener(marker, 'click', function() {
+    // 인포 윈도우 컨텐츠
     const content = `
-        <div style="padding:5px;">
-            이름: ${restaurant.name} <br>
-            메뉴: ${restaurant.menu} <br>
-            주소: ${restaurant.address} <br>
-            <button onclick="getDirectionsToRestaurant({name: '${restaurant.name}', latitude: ${restaurant.latitude}, longitude: ${restaurant.longitude}})">네이버 길찾기</button>
+        <div style="text-align: center; border-radius: 10px 10px 10px 10px;padding: 10px;">
+            <img src="${restaurant.image}" alt="${restaurant.name}" width="100">
+            <h3 style="font-size: 16px;padding-bottom: 5px;margin: 10px 0;">${restaurant.name}</h3>
+            <p style="font-size:12px; color: #333">메뉴: ${restaurant.menu}</p>
+            <p style="font-size:12px; color: #333">주소: ${restaurant.address}</p>
+            <p style="font-size:12px; color: #333">전화번호: ${restaurant.phone}</p>
+            <button onclick="getDirectionsToRestaurant({name: '${restaurant.name}', latitude: ${restaurant.latitude}, longitude: ${restaurant.longitude}})">길찾기</button>
         </div>
     `;
-    infowindow.setContent(content);
-    infowindow.open(map, marker);
+
+    const infowindow = new naver.maps.InfoWindow({
+        content: content
+    });
+
+    naver.maps.Event.addListener(marker, 'click', function() {
+        if (openedInfowindow) {  // 이미 열린 정보창이 있다면
+            openedInfowindow.close();  // 그 정보창을 닫는다
+        }
+        infowindow.open(map, marker);  // 새 정보창을 연다
+        openedInfowindow = infowindow;  // 새로 열린 정보창을 저장한다
+    });
+}
+
+// 지도를 클릭했을 때의 이벤트
+naver.maps.Event.addListener(map, 'click', function() {
+    if (openedInfowindow) {  // 이미 열린 정보창이 있다면
+        openedInfowindow.close();  // 그 정보창을 닫는다
+        openedInfowindow = null;  // 열린 정보창 변수를 초기화한다
+    }
 });
 
-    marker.setMap(map);
-}
+
+
 
 function showAllRestaurants() {
     fetch(`/api/get_all_restaurants/`)
@@ -52,8 +80,8 @@ function addMarkerByAddress(address) {
             document.getElementById("latitudeResult").innerText = data.latitude;
             document.getElementById("longitudeResult").innerText = data.longitude;
 
-            const position = new kakao.maps.LatLng(data.latitude, data.longitude);
-            const marker = new kakao.maps.Marker({
+            const position = new naver.maps.LatLng(data.latitude, data.longitude);
+            const marker = new naver.maps.Marker({
                 position: position
             });
             marker.setMap(map);
@@ -63,43 +91,44 @@ function addMarkerByAddress(address) {
     });
 }
 
+
 var userMarker;
 function showUserLocation() {
     if (!navigator.geolocation) {
         alert("이 브라우저에서는 Geolocation이 지원되지 않습니다.");
         return;
     }
-
     function success(position) {
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
-        userMarkerPosition = new kakao.maps.LatLng(latitude, longitude);
+        userMarkerPosition = new naver.maps.LatLng(latitude, longitude);
 
         if (userMarker) {
             userMarker.setPosition(userMarkerPosition);
         } else {
-            userMarker = new kakao.maps.Marker({
+            userMarker = new naver.maps.Marker({
                 position: userMarkerPosition,
-                image: new kakao.maps.MarkerImage(
-                    'https://icons.iconarchive.com/icons/emey87/trainee/16/Gps-icon.png',
-                    new kakao.maps.Size(24, 24),
-                    { offset: new kakao.maps.Point(12, 12) }
-                ),
+                map: map,
+                icon: {
+                    url: 'https://icons.iconarchive.com/icons/emey87/trainee/16/Gps-icon.png',
+                    scaledSize: new naver.maps.Size(25, 25)
+                },
                 draggable: true
             });
-            userMarker.setMap(map);
-            kakao.maps.event.addListener(userMarker, 'dragend', function() {
+            naver.maps.Event.addListener(userMarker, 'dragend', function() {
                 userMarkerPosition = userMarker.getPosition();
             });
         }
         map.setCenter(userMarkerPosition);
+        map.setZoom(17)
     }
-
     function error() {
         alert("위치 정보를 가져올 수 없습니다.");
     }
     navigator.geolocation.getCurrentPosition(success, error);
 }
+
+
 
 function getDirectionsToRestaurant(restaurant) {
     if (userMarkerPosition) {
@@ -114,6 +143,23 @@ function getDirectionsToRestaurant(restaurant) {
             console.log("API Response: ", data);
             if (data.result === 'success') {
                 window.open(data.link, '_blank');
+
+                polylinePath = [];
+
+                data.data.route.traoptimal[0].path.forEach( (data, index) => {
+                    polylinePath.push( new naver.maps.LatLng( data[0], data[1] ) )
+                })
+
+                console.log( polylinePath )
+
+                var polyline = new naver.maps.Polyline({
+                    path: polylinePath,      //선 위치 변수배열
+                    strokeColor: '#FF0000', //선 색 빨강 #빨강,초록,파랑
+                    strokeOpacity: 0.8, //선 투명도 0 ~ 1
+                    strokeWeight: 6,   //선 두께
+                    map: map           //오버레이할 지도
+                });
+
             } else {
                 alert('길찾기를 실패했습니다.');
             }
@@ -160,12 +206,13 @@ function findRoute(start_x, start_y, end_x, end_y) {
         }
     });
 }
+
+
 // 페이지 로드가 완료되면 실행
 $(document).ready(function() {
-    // 목적지는 미리 설정되어 있다고 가정 (예: 서울역)
-    end_x = 126.972559;
-    end_y = 37.555062;
 
     // 현재 위치를 가져와서 경로를 찾는 함수 호출
     getCurrentLocation();
+
+    showAllRestaurants();
 });

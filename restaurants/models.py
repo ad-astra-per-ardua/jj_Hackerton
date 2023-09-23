@@ -7,7 +7,8 @@ class Restaurant(models.Model):
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
     type = models.CharField(max_length=20,choices=[('음식점','음식점'), ('카페','카페')], blank=True,null=True)
-    image_url = models.URLField(blank=True, null=True)
+    image = models.ImageField(blank=True, null=True)
+    phone = models.CharField(max_length=15,null=False,default='정보 없음')
 
     def __str__(self):
         return self.name

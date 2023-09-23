@@ -11,15 +11,6 @@ import urllib.request
 logger = logging.getLogger(__name__)
 
 
-def map_link(request):
-    latitude = request.GET.get('latitude')
-    longitude = request.GET.get('longitude')
-    name = request.GET.get('name')
-
-    link = f"https://map.kakao.com/link/map/{name},{latitude},{longitude}"
-    return JsonResponse({'link': link})
-
-
 @csrf_exempt
 def create_naver_directions_link(request):
     try:
@@ -36,7 +27,7 @@ def create_naver_directions_link(request):
         client_id = naverapi
         client_secret = naverpass
 
-        url = f"https://naveropenapi.apigw.ntruss.com/map-direction-15/v1/driving?start={start[0]},{start[1]}&goal={goal[0]},{goal[1]}"
+        url = f"https://naveropenapi.apigw.ntruss.com/map-direction-15/v1/driving?start={start[1]},{start[0]}&goal={goal[1]},{goal[0]}"
 
         request = urllib.request.Request(url)
         request.add_header('X-NCP-APIGW-API-KEY-ID', client_id)
@@ -46,14 +37,13 @@ def create_naver_directions_link(request):
         response_body = response.read().decode('utf-8')
         logger.info(f"API Response: {response_body}")
         data = json.loads(response_body)
-        final_url = data.get('route', {}).get('traoptimal', {}).get('summary', {}).get('route_url', '')
+        # final_url = data.get('route', {}).get('traoptimal', {}).get('summary', {}).get('route_url', '')
         logger.debug(f"API Response: {data}")
 
-        return JsonResponse({'result': 'success', 'link': final_url})
+        return JsonResponse({'result': 'success', 'data': data})
 
     except Exception as e:
         return JsonResponse({'result': 'error', 'message': str(e)})
-
 
 @csrf_exempt
 def route_link(request):
@@ -82,22 +72,6 @@ def route_link(request):
 
     except Exception as e:
         return JsonResponse({'result': 'error', 'message': str(e)})
-
-
-def roadview_link(request):
-    latitude = request.GET.get('latitude')
-    longitude = request.GET.get('longitude')
-
-    link = f"https://map.kakao.com/link/roadview/{latitude},{longitude}"
-    return JsonResponse({'link': link})
-
-
-def search_link(request):
-    query = request.GET.get('query')
-
-    link = f"https://map.kakao.com/link/search/{query}"
-    return JsonResponse({'link': link})
-
 
 def add_restaurant(request):
     if request.method == "POST":
@@ -132,11 +106,13 @@ def get_all_restaurants(request):
     restaurants = Restaurant.objects.all()
     data = [
         {
+            "image": restaurant.image.url if restaurant.image else None,
             "name": restaurant.name,
-            "menu": restaurant.menu,
+            "menu": restaurant.menu.split("', '")[0].lstrip("'["),
             "address": restaurant.address,
             "latitude": restaurant.latitude,
-            "longitude": restaurant.longitude
+            "longitude": restaurant.longitude,
+            "phone": restaurant.phone if restaurant.image else None
         }
         for restaurant in restaurants if restaurant.latitude and restaurant.longitude
     ]
@@ -167,8 +143,8 @@ def geocode_address(address):
         return None, None
 
 def secret(request):
-    js_key = get_secret("js_key")
-    return render(request, 'map_test.html', {'js_key': js_key})
+    NAVER_API_KEY_ID = get_secret("NAVER_API_KEY_ID")
+    return render(request, 'index.html', {'NAVER_API_KEY_ID': NAVER_API_KEY_ID})
 
 
 def get_naver_directions(request):
@@ -181,6 +157,5 @@ def get_naver_directions(request):
 
     link = f"https://map.naver.com/v5/directions/{start_latitude},{start_longitude},{start_name}/{end_latitude},{end_longitude},{end_name}/"
     return JsonResponse({'link': link})
-
 
 
