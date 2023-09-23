@@ -13,15 +13,32 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="{% static 'public.css' %}" />
-     <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId={{ NAVER_API_KEY_ID }}"></script>
+     <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g8lnz5fqgx"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <script>
+
+      // Map
+var map = new naver.maps.Map('map', {
+    center: new naver.maps.LatLng(position.coords.latitude, position.coords.longitude),
+    zoom: 12,
+    mapTypes: new naver.maps.MapTypeRegistry({
+    'normal': naver.maps.NaverStyleMapTypeOptions.getNormalMap({
+      overlayType: 'bg.ol.ts.ctt.lko'
+    })
+  })
+});
+
+
+  </script>
+
   </head>
   <body>
     <div class="container">
       <!-- Nav -->
       <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
-          <a class="navbar-brand" href="#">
+          <a class="navbar-brand" href="/">
             <img src="/static/img/logo.png" alt="Bootstrap" height="60" />
           </a>
           <button
@@ -48,7 +65,7 @@
         </div>
       </nav>
 
-      <div class="mt-2">지도 넣는 곳</div>
+      <div class="mt-2" id="map" style="width: 500px;height: 400px"></div>
 
       <div class="mt-4">
         <h2>계획</h2>

@@ -6,17 +6,72 @@ var end_y = 37.555062;
 var markerClicked = false;
 var mapContainer = document.getElementById('map');
 var mapDiv = document.getElementById('map');
-var mapOptions = {
-    center: new naver.maps.LatLng(33.499621,126.531188),
-    zoom:10
-}
-var map = new naver.maps.Map('map',mapOptions);
 
+var map = new naver.maps.Map('map', {
+    center: new naver.maps.LatLng(33.499621, 126.531188),
+    zoom: 12,
+    mapTypes: new naver.maps.MapTypeRegistry({
+    'normal': naver.maps.NaverStyleMapTypeOptions.getNormalMap({
+      overlayType: 'bg.ol.ts.ctt.lko'
+    })
+  })
+});
 
-var trafficLayer = new naver.maps.TrafficLayer({
-    interval : 300000
-})
-var btn = $('#traffic')
+// var map = new naver.maps.Map('map', {
+//     center: new naver.maps.LatLng(33.499621, 126.531188),
+//     mapTypeControl: true,
+//     mapTypeControlOptions: {
+//         style: naver.maps.MapTypeControlStyle.DROPDOWN
+//     }
+// });
+//
+// var trafficLayer = new naver.maps.TrafficLayer({
+//     interval: 300000 // 5분마다 새로고침 (최소값 5분)
+// });
+//
+// var btn = $('#traffic');
+//
+// naver.maps.Event.addListener(map, 'trafficLayer_changed', function(trafficLayer) {
+//     if (trafficLayer) {
+//         btn.addClass('control-on');
+//         $("#autorefresh").parent().show();
+//         $("#autorefresh")[0].checked = true;
+//     } else {
+//         btn.removeClass('control-on');
+//         $("#autorefresh").parent().hide();
+//     }
+// });
+//
+// btn.on("click", function(e) {
+//     e.preventDefault();
+//
+//     if (trafficLayer.getMap()) {
+//         trafficLayer.setMap(null);
+//     } else {
+//         trafficLayer.setMap(map);
+//     }
+// });
+//
+// $("#autorefresh").on("click", function(e) {
+//     var btn = $(this),
+//         checked = btn.is(":checked");
+//
+//     if (checked) {
+//         trafficLayer.startAutoRefresh();
+//     } else {
+//         trafficLayer.endAutoRefresh();
+//     }
+// });
+//
+// naver.maps.Event.once(map, 'init', function() {
+//     trafficLayer.setMap(map);
+// });
+//
+//
+// var trafficLayer = new naver.maps.TrafficLayer({
+//     interval : 300000
+// })
+// var btn = $('#traffic')
 
 
 var openedInfowindow = null;

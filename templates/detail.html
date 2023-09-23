@@ -15,40 +15,85 @@
     <link rel="stylesheet" href="{% static 'public.css' %}" />
      <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId={{ NAVER_API_KEY_ID }}"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId={{ NAVER_API_KEY_ID }}"></script>
+<style>
+  #review-form {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+  }
 
+  #review-form.active {
+    max-height: 500px;
+  }
+</style>
 
-      <script>
-          var rawMenuString = "{{ restaurant.menu }}";
+<script>
+  var rawMenuString = "{{ restaurant.menu }}";
 
+  function updateDetailPage(restaurantInfo) {
+    // 제목 업데이트
+    document.getElementById("restaurant-name").textContent = restaurantInfo.name;
+    // replace
+    rawMenuString = rawMenuString.replace(/'/g, '"');
+    // parsing and convert
+    var menuArray = JSON.parse(rawMenuString);
+    // split and show
+    var menuListDiv = document.getElementById("menu-list");
+    menuListDiv.innerHTML = "";
+    var ulElement = document.createElement("ul");
+    var primaryMenu = menuArray[0].split(' ');
+    document.getElementById("restaurant-menu").textContent = `${primaryMenu[0]} : ${primaryMenu[1]}`;
+    var fullMenu = "";
 
-      function updateDetailPage(restaurantInfo) {
-  // 제목 업데이트
-  document.getElementById("restaurant-name").textContent = restaurantInfo.name;
-// replace
-rawMenuString = rawMenuString.replace(/'/g, '"');
-// parsing and convert
-var menuArray = JSON.parse(rawMenuString);
-// split and show
-var menuListDiv = document.getElementById("menu-list");
-menuListDiv.innerHTML = "";
-var ulElement = document.createElement("ul");
-var primaryMenu = menuArray[0].split(' ');
-document.getElementById("restaurant-menu").textContent = `${primaryMenu[0]} : ${primaryMenu[1]}`;
-var fullMenu = "";
+    menuArray.forEach(menuItem => {
+      var parts = menuItem.split(' ');
+      var menuName = parts[0];
+      var menuPrice = parts[1];
+      var liElement = document.createElement("li");
+      fullMenu += `${menuName} : ${menuPrice}<br>`;
+    });
+    document.getElementById("menu-list").innerHTML = fullMenu;
+    menuListDiv.appendChild(ulElement);
+  }
 
-menuArray.forEach(menuItem => {
-    var parts = menuItem.split(' ');
-    var menuName = parts[0];
-    var menuPrice = parts[1];
-    var liElement = document.createElement("li");
-    fullMenu += `${menuName} : ${menuPrice}<br>`;
+  document.addEventListener("DOMContentLoaded", function() {
+    var reviewButton = document.getElementById("review-button");
+    var form = document.getElementById("review-form");
 
-});
-document.getElementById("menu-list").innerHTML = fullMenu;
+    reviewButton.addEventListener("click", function() {
+      form.classList.toggle("active");
+    });
 
+    function submitReview(e) {
+      e.preventDefault();
 
-  menuListDiv.appendChild(ulElement);
-}
+      var author = document.getElementById("author").value;
+      var content = document.getElementById("content").value;
+      var rating = document.getElementById("rating").value;
+
+      // li 태그 생성
+      var newReview = document.createElement("li");
+      newReview.className = "list-group-item";
+
+      // 리뷰 내용 채우기
+      newReview.innerHTML = `
+        <b><h5>${author}</h5></b>
+        <p class="mb-1">${content}</p>
+        <div class="btn-group">
+          <button type="button" class="btn btn-outline-secondary disabled">별점: ${rating}</button>
+        </div>
+      `;
+
+      // 리뷰를 ul 태그에 추가
+      document.querySelector(".list-group").appendChild(newReview);
+
+      // 리뷰 작성 후 폼 숨기기
+      form.classList.remove("active");
+    }
+  });
+</script>
+
   </script>
 
 
@@ -58,7 +103,7 @@ document.getElementById("menu-list").innerHTML = fullMenu;
       <!-- Nav -->
       <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
-          <button type="button" class="btn btn-outline-secondary">
+          <button type="button" class="btn btn-outline-secondary" onclick="window.history.back();">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -74,7 +119,7 @@ document.getElementById("menu-list").innerHTML = fullMenu;
             </svg>
           </button>
 
-          <a class="navbar-brand" href="#">
+          <a class="navbar-brand" href="/">
             <img src="{% static 'img/logo.png' %}" alt="Bootstrap" height="60" />
           </a>
           <button
@@ -91,10 +136,10 @@ document.getElementById("menu-list").innerHTML = fullMenu;
           <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
               <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#">홈</a>
+                <a class="nav-link active" aria-current="page" href="/">홈</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">지도</a>
+                <a class="nav-link" href="/plan/">계획</a>
               </li>
             </ul>
           </div>
@@ -109,8 +154,23 @@ document.getElementById("menu-list").innerHTML = fullMenu;
       <!-- Button Group -->
       <div class="btn-group mb-3" role="group" aria-label="Basic example">
         <button type="button" class="btn btn-primary">경로에 추가</button>
-        <button type="button" class="btn btn-outline-primary">리뷰 작성</button>
+        <button type="button" class="btn btn-outline-primary" id="review-button">리뷰 작성</button>
       </div>
+<form id="review-form">
+  <div class="mb-3">
+    <label for="author" class="form-label">작성자</label>
+    <input type="text" class="form-control" id="author">
+  </div>
+  <div class="mb-3">
+    <label for="content" class="form-label">리뷰 내용</label>
+    <textarea class="form-control" id="content" rows="3"></textarea>
+  </div>
+  <div class="mb-3">
+    <label for="rating" class="form-label">별점</label>
+    <input type="number" class="form-control" id="rating" min="1" max="5">
+  </div>
+  <button type="submit" class="btn btn-outline-primary">리뷰 작성</button>
+</form>
 
       <!-- Detail Information -->
 <div class="mb-3">
@@ -118,7 +178,7 @@ document.getElementById("menu-list").innerHTML = fullMenu;
     <ul>
         <p id="restaurant-menu"></p>
     </ul>
-    <div id="menu-list">{{ restaurant.menu }}</div> <!-- 이 부분은 숨겨 둡니다. -->
+    <div id="menu-list">{{ restaurant.menu }}</div>
 </div>
       <div
         class="p-3 mt-3"
@@ -128,7 +188,7 @@ document.getElementById("menu-list").innerHTML = fullMenu;
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
             <b><h5>방기림</h5></b>
-            <img src="static/img/sample3.jpg" class="max-width-image mb-1" />
+            <img src="{% static 'img/sample2.jpg'%}" class="max-width-image mb-1" />
             <p class="mb-1">
               너무 맛있고 좋네요 ㅎㅎ 그치만<br />
               별점은 3개만 드릴게요
@@ -213,7 +273,7 @@ document.getElementById("menu-list").innerHTML = fullMenu;
           </li>
           <li class="list-group-item mt-1">
             <b><h5>안현우</h5></b>
-            <img src="/img/sample2.jpg" class="max-width-image mb-1" />
+            <img src="{% static 'img/sample3.jpg'%}" class="max-width-image mb-1" />
             <p class="mb-1">별점 테러합니다.</p>
             <div class="btn-group">
               <button type="button" class="btn btn-outline-secondary disabled">
