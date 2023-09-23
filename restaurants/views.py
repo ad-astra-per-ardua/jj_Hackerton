@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse
-from .models import Restaurant
+from .models import Restaurant, TravelPlan
 import secrets
 import requests,logging,ast
 import json
@@ -151,3 +151,27 @@ def your_view_function(request, restaurant_id):
 
     return render(request, 'detail.html', {'restaurant': restaurant})
 
+
+def save_plan(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode('utf-8'))
+        restaurant_name = data.get('restaurantName')
+        planned_time = data.get('plannedTime')
+
+        try:
+            restaurant = Restaurant.objects.get(name=restaurant_name)
+            new_plan = TravelPlan(restaurant=restaurant, planned_time=planned_time)
+            new_plan.save()
+            return JsonResponse({"status": "success"}, status=201)
+        except Restaurant.DoesNotExist:
+            return JsonResponse({"status": "Restaurant does not exist"}, status=404)
+    else:
+        return JsonResponse({"status": "method not allowed"}, status=405)
+
+
+def show_plan(request):
+    return render(request, 'plan.html')
+
+
+def home_view(request):
+    return render(request, 'index.html')

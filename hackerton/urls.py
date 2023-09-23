@@ -5,7 +5,7 @@ from django.conf import settings
 from django.urls import path
 from restaurants import views
 from django.views.generic import *
-
+from restaurants.views import home_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -17,6 +17,8 @@ urlpatterns = [
     path('create_naver_directions_link/',views.create_naver_directions_link,name='create_naver_directions_link'),
     path('detail/', views.show_detail, name='show_detail'),
     path('detail/<str:restaurant_name>/', views.restaurant_detail, name='restaurant_detail'),
+    path('plan/',views.show_plan,name='show_plan'),
+    path('api/save_plan/', views.save_plan, name='save_plan'),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

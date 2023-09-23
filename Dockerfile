@@ -5,5 +5,6 @@ WORKDIR /hackerton
 COPY requirements.txt /hackerton/
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . /hackerton/
+EXPOSE 8080
 
-ENTRYPOINT ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8080"]

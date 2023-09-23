@@ -1,3 +1,5 @@
+
+
 var userMarkerPosition;
 var end_x = 126.972559;
 var end_y = 37.555062;
@@ -267,10 +269,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
     return distance;
 }
-function addTravelPlan(){
-    let time = prompt("예정 방문시각을 적어주세요(N일 N시 N분 (24시간형식))\n (25일 13시 21분) : ");
-    let parsedTime = time.replace(/\D/g, '');
-}
+
 function showNearestRestaurants(userLat, userLon) {
   fetch('/api/get_all_restaurants/')
     .then(response => response.json())
@@ -303,29 +302,68 @@ function showNearestRestaurants(userLat, userLon) {
     });
 }
 
+
 function getCurrentPositionAsync() {
   return new Promise((resolve, reject) => {
     navigator.geolocation.getCurrentPosition(resolve, reject);
   });
 }
 
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const csrftoken = getCookie('csrftoken');
+
+function addTravelPlan(restaurantName) {
+  const plannedTime = prompt("계획한 시간을 입력하세요:", "");
+  if (plannedTime !== null) {
+    fetch('/api/save_plan/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken  // Django의 CSRF 토큰
+      },
+      body: JSON.stringify({ restaurantName: "", plannedTime: plannedTime })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === "success") {
+        alert("계획이 저장되었습니다!");
+      } else {
+        alert("에러가 발생했습니다.");
+      }
+    });
+  }
+}
+
+
+
 document.addEventListener("DOMContentLoaded", function() {
-  // 기존의 코드
   getCurrentLocation();
   showAllRestaurants();
-
-
-  document.body.addEventListener("click", function(event) {
-    if (event.target.classList.contains("detail-button")) {
-      const restaurantId = event.target.getAttribute("data-id");
-      if (restaurantId) {  // restaurantId가 undefined 또는 null이 아니면
-        navigateToDetail(restaurantName);
-      } else {
-        console.error("restaurantId가 정의되지 않았습니다.");  // 디버깅을 위한 로그
-      }
-    }
-  })
-})
+    document.body.addEventListener("click", function(event) {
+        if (event.target.classList.contains("detail-button")) {
+            const restaurantId = event.target.getAttribute("data-id");
+            if (restaurantId) {
+                navigateToDetail(restaurantName);
+            } else {
+                console.error("restaurantId가 정의되지 않았습니다.");
+            }
+        }
+    });
+});
 
 
 
