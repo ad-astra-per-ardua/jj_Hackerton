@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from .models import Restaurant
 import secrets
-import requests,logging
+import requests,logging,ast
 import json
 from hackerton.settings import get_secret
 from django.views.decorators.csrf import csrf_exempt
@@ -52,6 +52,9 @@ def route_link(request):
         start_y = request.GET.get('start_y', None)
         end_x = request.GET.get('end_x', None)
         end_y = request.GET.get('end_y', None)
+        is_mobile = int(request.GET.get('mobile', None))
+        start_name = request.GET.get('start_name', '내 위치')
+        end_name = request.GET.get('end_name')
 
         url = "https://naveropenapi.apigw.ntruss.com/map-direction/v1/driving"
 
@@ -65,7 +68,11 @@ def route_link(request):
             'goal': f"{end_x},{end_y}",
         }
 
-        final_url = f"https://map.naver.com/p/directions/{start_y},{start_x},출발지/{end_y},{end_x},도착지/transit"
+        if is_mobile:
+            final_url = f"https://m.search.naver.com/search.naver?query=%EB%B9%A0%EB%A5%B8%EA%B8%B8%EC%B0%BE%EA%B8%B0&nso_path=placeType%5Eplace%3Bname%5E출발지%3Baddress%5E%3Blongitude%5E{start_x}%3Blatitude%5E{start_y}%3Bcode%5E%7Ctype%5Eplace%3Bname%5E도착지%3Baddress%5E%3Blongitude%5E{end_x}%3Blatitude%5E{end_y}%3Bcode%5E%7Cobjtype%5Epath%3Bby%5Epubtrans"
+        else:
+            final_url = f"http://map.naver.com/index.nhn?slng={start_x}&slat={start_y}&stext={start_name}&elng={end_x}&elat={end_y}&pathType=0&showMap=true&etext=도착지&menu=rout"
+
         logger.debug(f"Final URL: {final_url}")
 
         return JsonResponse({'result': 'success', 'route_url': final_url})
@@ -129,4 +136,18 @@ def get_naver_directions(request):
     link = f"https://map.naver.com/v5/directions/{start_latitude},{start_longitude},{start_name}/{end_latitude},{end_longitude},{end_name}/"
     return JsonResponse({'link': link})
 
+# redirect to detail page
+def show_detail(request):
+    return render(request, 'detail.html')
+
+def restaurant_detail(request, restaurant_name):
+    restaurant = Restaurant.objects.get(name=restaurant_name)
+    return render(request, 'detail.html', {'restaurant': restaurant})
+
+def your_view_function(request, restaurant_id):
+    restaurant = Restaurant.objects.get(id=restaurant_id)
+    menu_list = ast.literal_eval(restaurant.menu)
+    restaurant.menu_list = menu_list
+
+    return render(request, 'detail.html', {'restaurant': restaurant})
 

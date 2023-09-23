@@ -15,6 +15,9 @@ urlpatterns = [
     path('api/get_all_restaurants/', views.get_all_restaurants, name='get_all_restaurants'),
     path('api/naver_directions/', views.get_naver_directions, name='naver_directions'),
     path('create_naver_directions_link/',views.create_naver_directions_link,name='create_naver_directions_link'),
+    path('detail/', views.show_detail, name='show_detail'),
+    path('detail/<str:restaurant_name>/', views.restaurant_detail, name='restaurant_detail'),
+
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

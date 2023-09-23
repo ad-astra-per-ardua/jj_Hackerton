@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -10,7 +12,46 @@
       integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
       crossorigin="anonymous"
     />
-    <link rel="stylesheet" href="public.css" />
+    <link rel="stylesheet" href="{% static 'public.css' %}" />
+     <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId={{ NAVER_API_KEY_ID }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+      <script>
+          var rawMenuString = "{{ restaurant.menu }}";
+
+
+      function updateDetailPage(restaurantInfo) {
+  // 제목 업데이트
+  document.getElementById("restaurant-name").textContent = restaurantInfo.name;
+// replace
+rawMenuString = rawMenuString.replace(/'/g, '"');
+// parsing and convert
+var menuArray = JSON.parse(rawMenuString);
+// split and show
+var menuListDiv = document.getElementById("menu-list");
+menuListDiv.innerHTML = "";
+var ulElement = document.createElement("ul");
+var primaryMenu = menuArray[0].split(' ');
+document.getElementById("restaurant-menu").textContent = `${primaryMenu[0]} : ${primaryMenu[1]}`;
+var fullMenu = "";
+
+menuArray.forEach(menuItem => {
+    var parts = menuItem.split(' ');
+    var menuName = parts[0];
+    var menuPrice = parts[1];
+    var liElement = document.createElement("li");
+    fullMenu += `${menuName} : ${menuPrice}<br>`;
+
+});
+document.getElementById("menu-list").innerHTML = fullMenu;
+
+
+  menuListDiv.appendChild(ulElement);
+}
+  </script>
+
+
   </head>
   <body>
     <div class="container">
@@ -34,7 +75,7 @@
           </button>
 
           <a class="navbar-brand" href="#">
-            <img src="/img/logo.png" alt="Bootstrap" height="60" />
+            <img src="{% static 'img/logo.png' %}" alt="Bootstrap" height="60" />
           </a>
           <button
             class="navbar-toggler"
@@ -62,7 +103,7 @@
 
       <!-- Image -->
       <div class="mb-3 mt-3">
-        <img src="/img/sample1.jpg" class="max-width-image" />
+        <img src="{{ restaurant.image.url }}" class="max-width-image"  alt="image"/>
       </div>
 
       <!-- Button Group -->
@@ -71,22 +112,14 @@
         <button type="button" class="btn btn-outline-primary">리뷰 작성</button>
       </div>
 
-      <!-- Detail Imformation -->
-      <div class="mb-3">
-        <h3>매장명</h3>
-        <ul>
-          <li>대표메뉴 : 금액</li>
-          <li>운영시간 : 09:00~18:00</li>
-        </ul>
-        <h5>상세 메뉴판</h5>
-        <ul>
-          <li>메뉴 : 금액</li>
-          <li>메뉴 : 금액</li>
-          <li>메뉴 : 금액</li>
-          <li>메뉴 : 금액</li>
-        </ul>
-      </div>
-
+      <!-- Detail Information -->
+<div class="mb-3">
+    <h3 id="restaurant-name">{{ restaurant.name }}</h3>
+    <ul>
+        <p id="restaurant-menu"></p>
+    </ul>
+    <div id="menu-list">{{ restaurant.menu }}</div> <!-- 이 부분은 숨겨 둡니다. -->
+</div>
       <div
         class="p-3 mt-3"
         style="background-color: rgb(247, 247, 247); border-radius: 10px"
@@ -95,7 +128,7 @@
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
             <b><h5>방기림</h5></b>
-            <img src="/img/sample3.jpg" class="max-width-image mb-1" />
+            <img src="static/img/sample3.jpg" class="max-width-image mb-1" />
             <p class="mb-1">
               너무 맛있고 좋네요 ㅎㅎ 그치만<br />
               별점은 3개만 드릴게요

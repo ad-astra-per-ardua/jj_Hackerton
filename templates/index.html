@@ -12,9 +12,13 @@
       integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
       crossorigin="anonymous"
     />
-    <link rel="stylesheet" href="{% static public.css %}" />
+      <script src="{% static 'pageMove.js' %}"></script>
+      <link href="/static/public.css" rel="stylesheet">
      <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId={{ NAVER_API_KEY_ID }}"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+</script>
   </head>
   <body>
     <div class="container">
@@ -99,8 +103,8 @@
             대표메뉴
           </div>
           <div class="btn-group mt-2" role="group">
-            <button type="button" class="btn btn-primary">상세보기</button>
-            <button type="button" class="btn btn-outline-primary">
+            <button type="button" class="btn btn-primary" onclick="navigateToDetail()">상세보기</button>
+            <button onclick="addTravelPlan()" type="button" class="btn btn-outline-primary">
               경로에 추가
             </button>
           </div>
@@ -111,8 +115,8 @@
             대표메뉴
           </div>
           <div class="btn-group mt-2" role="group">
-            <button type="button" class="btn btn-primary">상세보기</button>
-            <button type="button" class="btn btn-outline-primary">
+            <button type="button" class="btn btn-primary" onclick="navigateToDetail()">상세보기</button>
+            <button onclick="addTravelPlan()" type="button" class="btn btn-outline-primary">
               경로에 추가
             </button>
           </div>
@@ -123,8 +127,8 @@
             대표메뉴
           </div>
           <div class="btn-group mt-2" role="group">
-            <button type="button" class="btn btn-primary">상세보기</button>
-            <button type="button" class="btn btn-outline-primary">
+            <button type="button" class="btn btn-primary " onclick="navigateToDetail()">상세보기</button>
+            <button onclick="addTravelPlan()" type="button" class="btn btn-outline-primary">
               경로에 추가
             </button>
           </div>

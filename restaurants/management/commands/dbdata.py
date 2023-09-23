@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand
-from restaurants.models import Restaurant
 import csv, requests, os, tempfile, shutil
 import pandas as pd
+
+from restaurants.models import Restaurant
 from restaurants.views import geocode_address
 from django.core.files import File
 

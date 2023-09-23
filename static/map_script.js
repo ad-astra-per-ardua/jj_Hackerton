@@ -27,7 +27,7 @@ function createMarkerWithInfo(restaurant, map) {
         map: map
     });
 
-    // 인포 윈도우 컨텐츠
+    // 인포 윈도우 컨텐츠 (상세보기 버튼 추가)
     const content = `
         <div style="text-align: center; border-radius: 10px 10px 10px 10px;padding: 10px;">
             <img src="${restaurant.image}" alt="${restaurant.name}" width="100">
@@ -35,6 +35,7 @@ function createMarkerWithInfo(restaurant, map) {
             <p style="font-size:12px; color: #333">메뉴: ${restaurant.menu}</p>
             <p style="font-size:12px; color: #333">주소: ${restaurant.address}</p>
             <p style="font-size:12px; color: #333">전화번호: ${restaurant.phone}</p>
+            <button onclick="navigateToDetail(${restaurant.name})">상세보기</button>
             <button onclick="getDirectionsToRestaurant({name: '${restaurant.name}', latitude: ${restaurant.latitude}, longitude: ${restaurant.longitude}})">길찾기</button>
         </div>
     `;
@@ -44,11 +45,11 @@ function createMarkerWithInfo(restaurant, map) {
     });
 
     naver.maps.Event.addListener(marker, 'click', function() {
-        if (openedInfowindow) {  // 이미 열린 정보창이 있다면
-            openedInfowindow.close();  // 그 정보창을 닫는다
+        if (openedInfowindow) {
+            openedInfowindow.close();
         }
-        infowindow.open(map, marker);  // 새 정보창을 연다
-        openedInfowindow = infowindow;  // 새로 열린 정보창을 저장한다
+        infowindow.open(map, marker);
+        openedInfowindow = infowindow;
     });
 }
 
@@ -67,12 +68,28 @@ function showAllRestaurants() {
     fetch(`/api/get_all_restaurants/`)
     .then(response => response.json())
     .then(data => {
-        const restaurants = data.restaurants;
+        let restaurants = data.restaurants;
+
+        if (userMarkerPosition) {
+            const userLat = userMarkerPosition.lat();
+            const userLng = userMarkerPosition.lng();
+
+            restaurants.forEach(restaurant => {
+              restaurant.distance = calculateDistance(userLat, userLng, restaurant.latitude, restaurant.longitude);
+            });
+
+            restaurants.sort((a, b) => a.distance - b.distance);
+
+            restaurants = restaurants.slice(0, 3);
+        }
+
+        // 선택된 레스토랑을 지도에 표시
         for (const restaurant of restaurants) {
             createMarkerWithInfo(restaurant, map);
         }
     });
 }
+
 
 function addMarkerByAddress(address) {
     fetch(`/api/geocode/?address=${address}`)
@@ -96,15 +113,13 @@ function addMarkerByAddress(address) {
 
 var userMarker;
 function showUserLocation() {
-    if (!navigator.geolocation) {
-        alert("이 브라우저에서는 Geolocation이 지원되지 않습니다.");
-        return;
-    }
+
+
     function success(position) {
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
         userMarkerPosition = new naver.maps.LatLng(latitude, longitude);
-
+        showNearestRestaurants(latitude, longitude);
         if (userMarker) {
             userMarker.setPosition(userMarkerPosition);
         } else {
@@ -118,17 +133,38 @@ function showUserLocation() {
                 draggable: true
             });
             naver.maps.Event.addListener(userMarker, 'dragend', function() {
+                var newPosition = userMarker.getPosition();
+                var newLat = newPosition.lat();
+                var newLon = newPosition.lng();
                 userMarkerPosition = userMarker.getPosition();
+                showNearestRestaurants(newLat, newLon);
             });
         }
         map.setCenter(userMarkerPosition);
-        map.setZoom(17)
+        map.setZoom(17);
     }
-    function error() {
-        alert("위치 정보를 가져올 수 없습니다.");
+    function error(err) {
+    console.warn(`ERROR(${err.code}): ${err.message}`);
+
+    switch(err.code) {
+        case err.PERMISSION_DENIED:
+            alert("사용자가 위치 정보에 대한 요청을 거부했습니다.");
+            break;
+        case err.POSITION_UNAVAILABLE:
+            alert("위치 정보를 가져올 수 없습니다.");
+            break;
+        case err.TIMEOUT:
+            alert("위치 정보 요청이 시간 초과되었습니다.");
+            break;
+        default:
+            alert("알 수 없는 오류가 발생했습니다.");
+            break;
+    }
     }
     navigator.geolocation.getCurrentPosition(success, error);
 }
+
+
 
 function getDirectionsToRestaurant(restaurant) {
     if (userMarkerPosition) {
@@ -136,6 +172,9 @@ function getDirectionsToRestaurant(restaurant) {
         const startLng = userMarkerPosition.lng();
         const endLat = restaurant.latitude;
         const endLng = restaurant.longitude;
+        const is_mobile = isMobile();
+
+        console.log(is_mobile);
 
         $.ajax({
             url: `/route_link/`,
@@ -144,7 +183,8 @@ function getDirectionsToRestaurant(restaurant) {
                 start_x: startLng,
                 start_y: startLat,
                 end_x: endLng,
-                end_y: endLat
+                end_y: endLat,
+                mobile: is_mobile,
             },
             success: function(data) {
                 if (data.result === "success") {
@@ -157,6 +197,17 @@ function getDirectionsToRestaurant(restaurant) {
     } else {
         alert("사용자 위치를 먼저 설정해주세요.");
     }
+}
+
+//사용자의 접속 클라이언트 확인
+function isMobile() {
+    //화면의 너비가 768 픽셀 미만이면 모바일로 간주
+    if(window.innerWidth <= 768){
+        result = 1
+    }else{
+        result = 0
+    }
+    return result;
 }
 
 function getCurrentLocation() {
@@ -193,11 +244,91 @@ function findRoute(start_x, start_y, end_x, end_y) {
 }
 
 
-// 페이지 로드가 완료되면 실행
-$(document).ready(function() {
+// Haversine
 
-    // 현재 위치를 가져와서 경로를 찾는 함수 호출
-    getCurrentLocation();
+function toRadians(degree) {
+    return degree * (Math.PI / 180);
+}
 
-    showAllRestaurants();
-});
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+
+    const dLat = toRadians(lat2 - lat1);
+    const dLon = toRadians(lon2 - lon1);
+
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distance = R * c;
+
+    return distance;
+}
+function addTravelPlan(){
+    let time = prompt("예정 방문시각을 적어주세요(N일 N시 N분 (24시간형식))\n (25일 13시 21분) : ");
+    let parsedTime = time.replace(/\D/g, '');
+}
+function showNearestRestaurants(userLat, userLon) {
+  fetch('/api/get_all_restaurants/')
+    .then(response => response.json())
+    .then(data => {
+
+      const restaurants = data.restaurants;
+      for (const restaurant of restaurants) {
+        restaurant.distance = calculateDistance(userLat, userLon, restaurant.latitude, restaurant.longitude);
+      }
+
+      restaurants.sort((a, b) => a.distance - b.distance);
+      const nearestRestaurants = restaurants.slice(0, 3);
+      let listHTML = "";
+      console.log(nearestRestaurants);
+      for (const restaurant of nearestRestaurants) {
+        listHTML += `
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">${restaurant.name}</div>
+              ${restaurant.menu}
+            </div>
+            <div class="btn-group mt-2" role="group">
+              <button type="button" class="btn btn-primary detail-button" onclick="navigateToDetail('${restaurant.name}')">상세보기</button>
+              <button type="button" class="btn btn-outline-primary" onclick="addTravelPlan()">경로에 추가</button>
+              </button>
+            </div>
+          </a>
+        `;
+      }
+      document.querySelector('.list-group').innerHTML = listHTML;
+    });
+}
+
+function getCurrentPositionAsync() {
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(resolve, reject);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  // 기존의 코드
+  getCurrentLocation();
+  showAllRestaurants();
+
+
+  document.body.addEventListener("click", function(event) {
+    if (event.target.classList.contains("detail-button")) {
+      const restaurantId = event.target.getAttribute("data-id");
+      if (restaurantId) {  // restaurantId가 undefined 또는 null이 아니면
+        navigateToDetail(restaurantName);
+      } else {
+        console.error("restaurantId가 정의되지 않았습니다.");  // 디버깅을 위한 로그
+      }
+    }
+  })
+})
+
+
+
+// tourism section
+
+

@@ -1,7 +1,7 @@
 from django.db import models
 
 class Restaurant(models.Model):
-    name = models.CharField(max_length=100,primary_key=True,unique=True,null=False)
+    name = models.CharField(max_length=100,unique=True,null=False)
     menu = models.CharField(max_length=200)
     address = models.CharField(max_length=200)
     latitude = models.FloatField(blank=True, null=True)
@@ -12,4 +12,13 @@ class Restaurant(models.Model):
 
     def __str__(self):
         return self.name
+
+class TravelPlan(models.Model):
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
+    planned_time = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.restaurant.name} - {self.planned_time}"
+
+
 
