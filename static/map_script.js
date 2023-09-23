@@ -159,9 +159,6 @@ function getDirectionsToRestaurant(restaurant) {
     }
 }
 
-
-
-
 function getCurrentLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {

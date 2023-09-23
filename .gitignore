@@ -7,7 +7,6 @@
 *.pyc
 __pycache__/
 local_settings.py
-db.sqlite3
 db.sqlite3-journal
 media
 restaurants/migrations
@@ -717,4 +716,4 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 
-# End of https://www.toptal.com/developers/gitignore/api/django,python,pycharm+all,vs,jupyternotebooks
+# End of https://www.toptal.com/developers/gitignore/api/django,python,pycharm+all,vs,jupyternotebooks!/db.sqlite3

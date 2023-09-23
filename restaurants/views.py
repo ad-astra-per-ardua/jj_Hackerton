@@ -65,7 +65,7 @@ def route_link(request):
             'goal': f"{end_x},{end_y}",
         }
 
-        final_url = f"https://map.naver.com/p/directions/-/-/-/transit?c={end_y},{end_x},0,0,dh"
+        final_url = f"https://map.naver.com/p/directions/{start_y},{start_x},출발지/{end_y},{end_x},도착지/transit"
         logger.debug(f"Final URL: {final_url}")
 
         return JsonResponse({'result': 'success', 'route_url': final_url})
