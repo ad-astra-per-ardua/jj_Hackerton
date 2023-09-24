@@ -154,11 +154,13 @@ def your_view_function(request, restaurant_id):
 
 def save_plan(request):
     if request.method == "POST":
+        print('if 1st')
         data = json.loads(request.body.decode('utf-8'))
         restaurant_name = data.get('restaurantName')
         planned_time = data.get('plannedTime')
 
         try:
+            print('try 1st')
             restaurant = Restaurant.objects.get(name=restaurant_name)
             new_plan = TravelPlan(restaurant=restaurant, planned_time=planned_time)
             new_plan.save()
@@ -175,3 +177,21 @@ def show_plan(request):
 
 def home_view(request):
     return render(request, 'index.html')
+
+def sorting(request):
+    travel_plans = TravelPlan.objects.all().order_by('planned_time')
+    return render(request, 'plan.html', {'travel_plans': travel_plans})
+
+def get_travel_plans(request):
+    travel_plans = TravelPlan.objects.all().order_by('planned_time')
+    data = [
+        {
+            "name": plan.restaurant.name,
+            "latitude": plan.restaurant.latitude,
+            "longitude": plan.restaurant.longitude,
+            "planned_time": plan.planned_time,
+        }
+        for plan in travel_plans
+    ]
+    return JsonResponse({"travel_plans": data})
+

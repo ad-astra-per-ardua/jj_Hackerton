@@ -18,17 +18,27 @@
 
   <script>
 
-      // Map
-var map = new naver.maps.Map('map', {
-    center: new naver.maps.LatLng(position.coords.latitude, position.coords.longitude),
-    zoom: 12,
-    mapTypes: new naver.maps.MapTypeRegistry({
-    'normal': naver.maps.NaverStyleMapTypeOptions.getNormalMap({
-      overlayType: 'bg.ol.ts.ctt.lko'
-    })
-  })
-});
+document.addEventListener("DOMContentLoaded", function(){
+    // 지도 초기화
 
+
+    // TravelPlan 데이터 불러오기 및 지도에 마커 표시
+    fetch('/api/get_travel_plans/')  // Django에서 정의한 API의 URL
+    .then(response => response.json())
+    .then(data => {
+        let travel_plans = data.travel_plans;
+
+        // 지도에 마커 표시
+        for (const plan of travel_plans) {
+            const position = new naver.maps.LatLng(plan.latitude, plan.longitude);
+            const marker = new naver.maps.Marker({
+                position: position,
+                title: plan.name,
+                map: map
+            });
+        }
+    });
+});
 
   </script>
 
@@ -72,43 +82,49 @@ var map = new naver.maps.Map('map', {
 
         <!-- List -->
         <ul class="list-group list-group-flush">
-          <a href="#" class="list-group-item list-group-item-action mb-2">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">상점명</div>
-              방문시간
-            </div>
-            <div class="btn-group mt-2" role="group">
-              <button type="button" class="btn btn-primary">삭제</button>
-              <button type="button" class="btn btn-outline-primary">
+    <!-- 첫 번째 데이터 -->
+    <a href="#" class="list-group-item list-group-item-action mb-2">
+        <div class="ms-2 me-auto">
+            <div class="fw-bold">면사무소</div>
+            방문시간: 5일 11시 23분
+        </div>
+        <div class="btn-group mt-2" role="group">
+            <button type="button" class="btn btn-primary">삭제</button>
+            <button type="button" class="btn btn-outline-primary">
                 전화예약
-              </button>
-            </div>
-          </a>
-          <a href="#" class="list-group-item list-group-item-action mb-2">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">상점명</div>
-              방문시간
-            </div>
-            <div class="btn-group mt-2" role="group">
-              <button type="button" class="btn btn-primary">삭제</button>
-              <button type="button" class="btn btn-outline-primary">
+            </button>
+        </div>
+    </a>
+
+    <!-- 두 번째 데이터 -->
+    <a href="#" class="list-group-item list-group-item-action mb-2">
+        <div class="ms-2 me-auto">
+            <div class="fw-bold">바다풍경펜션</div>
+            방문시간: 5일 12시 44분
+        </div>
+        <div class="btn-group mt-2" role="group">
+            <button type="button" class="btn btn-primary">삭제</button>
+            <button type="button" class="btn btn-outline-primary">
                 전화예약
-              </button>
-            </div>
-          </a>
-          <a href="#" class="list-group-item list-group-item-action mb-2">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">상점명</div>
-              방문시간
-            </div>
-            <div class="btn-group mt-2" role="group">
-              <button type="button" class="btn btn-primary">삭제</button>
-              <button type="button" class="btn btn-outline-primary">
+            </button>
+        </div>
+    </a>
+
+    <!-- 세 번째 데이터 -->
+    <a href="#" class="list-group-item list-group-item-action mb-2">
+        <div class="ms-2 me-auto">
+            <div class="fw-bold">왕서방</div>
+            방문시간: 5일 14시 50분
+        </div>
+        <div class="btn-group mt-2" role="group">
+            <button type="button" class="btn btn-primary">삭제</button>
+            <button type="button" class="btn btn-outline-primary">
                 전화예약
-              </button>
-            </div>
-          </a>
-        </ul>
+            </button>
+        </div>
+    </a>
+</ul>
+
       </div>
     </div>
 
@@ -117,6 +133,17 @@ var map = new naver.maps.Map('map', {
       integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
       crossorigin="anonymous"
     ></script>
-  <script src="{% static 'map_script.js' %}"></script>
+    <script>
+        var map = new naver.maps.Map('map', {
+    center: new naver.maps.LatLng(33.499621, 126.531188),
+    zoom: 12,
+    mapTypes: new naver.maps.MapTypeRegistry({
+    'normal': naver.maps.NaverStyleMapTypeOptions.getNormalMap({
+      overlayType: 'bg.ol.ts.ctt.lko'
+    })
+  })
+});
+    </script>
+{#  <script src="{% static 'map_script.js' %}"></script>#}
   </body>
 </html>

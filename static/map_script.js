@@ -1,5 +1,3 @@
-
-
 var userMarkerPosition;
 var end_x = 126.972559;
 var end_y = 37.555062;
@@ -8,7 +6,7 @@ var mapContainer = document.getElementById('map');
 var mapDiv = document.getElementById('map');
 
 var map = new naver.maps.Map('map', {
-    center: new naver.maps.LatLng(33.499621, 126.531188),
+    center: new naver.maps.LatLng(33.4773085, 126.3628347),
     zoom: 12,
     mapTypes: new naver.maps.MapTypeRegistry({
     'normal': naver.maps.NaverStyleMapTypeOptions.getNormalMap({
@@ -17,64 +15,11 @@ var map = new naver.maps.Map('map', {
   })
 });
 
-// var map = new naver.maps.Map('map', {
-//     center: new naver.maps.LatLng(33.499621, 126.531188),
-//     mapTypeControl: true,
-//     mapTypeControlOptions: {
-//         style: naver.maps.MapTypeControlStyle.DROPDOWN
-//     }
-// });
-//
-// var trafficLayer = new naver.maps.TrafficLayer({
-//     interval: 300000 // 5분마다 새로고침 (최소값 5분)
-// });
-//
-// var btn = $('#traffic');
-//
-// naver.maps.Event.addListener(map, 'trafficLayer_changed', function(trafficLayer) {
-//     if (trafficLayer) {
-//         btn.addClass('control-on');
-//         $("#autorefresh").parent().show();
-//         $("#autorefresh")[0].checked = true;
-//     } else {
-//         btn.removeClass('control-on');
-//         $("#autorefresh").parent().hide();
-//     }
-// });
-//
-// btn.on("click", function(e) {
-//     e.preventDefault();
-//
-//     if (trafficLayer.getMap()) {
-//         trafficLayer.setMap(null);
-//     } else {
-//         trafficLayer.setMap(map);
-//     }
-// });
-//
-// $("#autorefresh").on("click", function(e) {
-//     var btn = $(this),
-//         checked = btn.is(":checked");
-//
-//     if (checked) {
-//         trafficLayer.startAutoRefresh();
-//     } else {
-//         trafficLayer.endAutoRefresh();
-//     }
-// });
-//
-// naver.maps.Event.once(map, 'init', function() {
-//     trafficLayer.setMap(map);
-// });
-//
-//
-// var trafficLayer = new naver.maps.TrafficLayer({
-//     interval : 300000
-// })
-// var btn = $('#traffic')
-
-
 var openedInfowindow = null;
+
+
+
+
 
 function createMarkerWithInfo(restaurant, map) {
     const position = new naver.maps.LatLng(restaurant.latitude, restaurant.longitude);
@@ -84,6 +29,8 @@ function createMarkerWithInfo(restaurant, map) {
         map: map
     });
 
+
+
     // 인포 윈도우 컨텐츠 (상세보기 버튼 추가)
     const content = `
         <div style="text-align: center; border-radius: 10px 10px 10px 10px;padding: 10px;">
@@ -92,7 +39,6 @@ function createMarkerWithInfo(restaurant, map) {
             <p style="font-size:12px; color: #333">메뉴: ${restaurant.menu}</p>
             <p style="font-size:12px; color: #333">주소: ${restaurant.address}</p>
             <p style="font-size:12px; color: #333">전화번호: ${restaurant.phone}</p>
-            <button onclick="navigateToDetail(${restaurant.name})">상세보기</button>
             <button onclick="getDirectionsToRestaurant({name: '${restaurant.name}', latitude: ${restaurant.latitude}, longitude: ${restaurant.longitude}})">길찾기</button>
         </div>
     `;
@@ -128,8 +74,8 @@ function showAllRestaurants() {
         let restaurants = data.restaurants;
 
         if (userMarkerPosition) {
-            const userLat = userMarkerPosition.lat();
-            const userLng = userMarkerPosition.lng();
+            const userLat = 33.4775864;
+            const userLng = 126.3622851;
 
             restaurants.forEach(restaurant => {
               restaurant.distance = calculateDistance(userLat, userLng, restaurant.latitude, restaurant.longitude);
@@ -170,56 +116,40 @@ function addMarkerByAddress(address) {
 
 var userMarker;
 function showUserLocation() {
+    // 위치 권한이 없다는 것을 가정하고 미리 정의한 위도, 경도
+    const defaultLatitude = 33.4775506;
+    const defaultLongitude = 126.3606329;
 
+    // 미리 정의한 위도, 경도를 사용하여 마커와 맵 설정
+    userMarkerPosition = new naver.maps.LatLng(defaultLatitude, defaultLongitude);
 
-    function success(position) {
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
-        userMarkerPosition = new naver.maps.LatLng(latitude, longitude);
-        showNearestRestaurants(latitude, longitude);
-        if (userMarker) {
-            userMarker.setPosition(userMarkerPosition);
-        } else {
-            userMarker = new naver.maps.Marker({
-                position: userMarkerPosition,
-                map: map,
-                icon: {
-                    url: 'https://icons.iconarchive.com/icons/emey87/trainee/16/Gps-icon.png',
-                    scaledSize: new naver.maps.Size(25, 25)
-                },
-                draggable: true
-            });
-            naver.maps.Event.addListener(userMarker, 'dragend', function() {
-                var newPosition = userMarker.getPosition();
-                var newLat = newPosition.lat();
-                var newLon = newPosition.lng();
-                userMarkerPosition = userMarker.getPosition();
-                showNearestRestaurants(newLat, newLon);
-            });
-        }
-        map.setCenter(userMarkerPosition);
-        map.setZoom(17);
-    }
-    function error(err) {
-    console.warn(`ERROR(${err.code}): ${err.message}`);
+    if (userMarker) {
+        userMarker.setPosition(userMarkerPosition);
+    } else {
+        userMarker = new naver.maps.Marker({
+            position: userMarkerPosition,
+            map: map,
+            icon: {
+                url: 'https://icons.iconarchive.com/icons/emey87/trainee/16/Gps-icon.png',
+                scaledSize: new naver.maps.Size(25, 25)
+            },
+            draggable: true
+        });
 
-    switch(err.code) {
-        case err.PERMISSION_DENIED:
-            alert("사용자가 위치 정보에 대한 요청을 거부했습니다.");
-            break;
-        case err.POSITION_UNAVAILABLE:
-            alert("위치 정보를 가져올 수 없습니다.");
-            break;
-        case err.TIMEOUT:
-            alert("위치 정보 요청이 시간 초과되었습니다.");
-            break;
-        default:
-            alert("알 수 없는 오류가 발생했습니다.");
-            break;
+        // 마커를 드래그 했을 때의 이벤트 핸들러
+        naver.maps.Event.addListener(userMarker, 'dragend', function() {
+            var newPosition = userMarker.getPosition();
+            var newLat = newPosition.lat();
+            var newLon = newPosition.lng();
+            showNearestRestaurants(newLat, newLon);
+        });
     }
-    }
-    navigator.geolocation.getCurrentPosition(success, error);
+
+    // 맵 중앙을 마커 위치로 설정하고, 줌 레벨을 조정
+    map.setCenter(userMarkerPosition);
+    map.setZoom(17);
 }
+
 
 
 
@@ -390,18 +320,22 @@ function addTravelPlan(restaurantName) {
         'Content-Type': 'application/json',
         'X-CSRFToken': csrftoken  // Django의 CSRF 토큰
       },
-      body: JSON.stringify({ restaurantName: "", plannedTime: plannedTime })
+      body: JSON.stringify({ restaurantName: restaurantName , plannedTime: plannedTime })
     })
     .then(response => response.json())
     .then(data => {
       if (data.status === "success") {
         alert("계획이 저장되었습니다!");
       } else {
-        alert("에러가 발생했습니다.");
+        alert("에러가 발생했습니다." + data.error);
       }
-    });
+    })
+      .catch(error => {
+            alert("서버나 네트워크 문제가 발생했습니다.");
+        });
   }
 }
+
 
 
 

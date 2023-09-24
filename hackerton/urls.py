@@ -19,7 +19,8 @@ urlpatterns = [
     path('detail/<str:restaurant_name>/', views.restaurant_detail, name='restaurant_detail'),
     path('plan/',views.show_plan,name='show_plan'),
     path('api/save_plan/', views.save_plan, name='save_plan'),
-
+    path('sorting/', views.sorting, name='sorting'),
+    path('api/get_travel_plans/',views.get_travel_plans,name='get_travel_plans'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
