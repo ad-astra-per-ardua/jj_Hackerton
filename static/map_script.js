@@ -17,10 +17,6 @@ var map = new naver.maps.Map('map', {
 
 var openedInfowindow = null;
 
-
-
-
-
 function createMarkerWithInfo(restaurant, map) {
     const position = new naver.maps.LatLng(restaurant.latitude, restaurant.longitude);
     const marker = new naver.maps.Marker({
@@ -148,6 +144,7 @@ function showUserLocation() {
     // 맵 중앙을 마커 위치로 설정하고, 줌 레벨을 조정
     map.setCenter(userMarkerPosition);
     map.setZoom(17);
+    showNearestRestaurants(defaultLatitude, defaultLongitude);
 }
 
 
