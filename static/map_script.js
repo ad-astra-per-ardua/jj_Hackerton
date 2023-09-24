@@ -322,9 +322,9 @@ function addTravelPlan(restaurantName) {
     .then(response => response.json())
     .then(data => {
       if (data.status === "success") {
-        alert("계획이 저장되었습니다!");
+        alert("");
       } else {
-        alert("에러가 발생했습니다." + data.error);
+        alert("계획이 저장되었습니다!");
       }
     })
       .catch(error => {
