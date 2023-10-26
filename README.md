@@ -1,6 +1,7 @@
 # hackerton
 [![CodeQL](https://github.com/d982h8st7/hackerton/actions/workflows/CodeQL.yaml/badge.svg)](https://github.com/d982h8st7/hackerton/actions/workflows/CodeQL.yaml) [![Codacy Security Scan](https://github.com/d982h8st7/hackerton/actions/workflows/codacy.yml/badge.svg)](https://github.com/d982h8st7/hackerton/actions/workflows/codacy.yml)
 ## 제주 스마트관광 빅데이터 해커톤 장려상 수상
+### 본인 구현 파트
 - 착한식당API와 관광지API를 Crawling해와 데이터 전처리과정을 거치고, DB에 Parsing해서 넣음.
 - Naver Geocoding API를 이용하여 도로명 주소를 위도,경도값으로 변환하여 DB에 Update.
 - 처음 웹 로딩시, 여행지와 DB에 있는 음식점을 모두 로딩하여 지도에 Marker로 표시.
